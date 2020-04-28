@@ -1,0 +1,198 @@
+---
+title: "Cyber Threats and Sources from AgConnections 2019/2020"
+author: "Ty Weglarz"
+date: "4-7-2019"
+output:
+  word_document: default
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+## Summary
+<p>We live in a day and age where our information is constantly being requested from forms, surveys, corporations, etc. Everyone has information stored somewhere on someone else’s server. This information is valuable to companies who derive valuable marketing information, but there are also malicious hackers and threat actors constantly trying to gain access to your information. I will examine this problem within the scope of an agricultural firm that offers several client, web, and native based solutions for growers and retailers everywhere. 
+The department of homeland security released a report addressing cybersecurity threats in agricultural technology. “An attacker could exploit precision agriculture vulnerabilities to access sensitive data, steal resources, and destroy equipment.” (DHS, 2018) Can we predict these threats? Can we know the country of origin by only knowing the type of threat and day it was received? These are questions I aim to answer using a sample of AgConnection's threat logs spanning only a few months. </p>
+<br><br><br>
+<p>AgConnection's and other firms receive threats daily that are stored in threat catalogs from security providers. Threats turned into attacks can destroy, exploit, or infiltrate an entire system. It would be useful if firms could predict these attacks down to the day, country, and threat type coming their way. I want to examine these variables and see where the most attacks originate from, the type of threat imposed, and the day the threat occurs. I wanted to see if it was possible to predict the type of attack based on country of origin and day of attack. I want to see if these variables can be used to predict one another using simple linear and multiple regression models. If these models prove to be accurate and useful. I could see them being used more commonly on systems around the globe. Potentially even built into firewalls for "unknown" sources or "unknown" threat types. Sometimes firewalls log this data and if it is a threat logged as an unknown location that stole information; you are going to want to have some idea of where this came from. Security logs are needed to be timely and accurate across this situation. </p>
+<br><br><br>
+<p>Before starting this research I was confident to see some sort of correlation between my variables and wanted to build a simple prediction shiny app from such, however, this wasn't the case. I believe that most attacks will originate from China. I also believe there will be a correlation between a threats origin and threat category. Based on my findings I would recommend a larger data set. I did expect somewhat of a correlation between my variables but I believe a data set that spans over the course of a few years and covers several systems has the possibility to yield a stronger correlation. I would like to run this process again using multiple systems threat catalogs instead of limited to the scope of just AgConnection's logs. I believe the addition of a wider time span and a larger scope of systems could yield stronger results. </p>
+<br><br><br>
+<p>I found no correlation between the three variable of day of week recieved, source country, and threat type. This could be due to the source of a small data set that only spanned one system over the course of early October 2019 to early February 2020. Again, I would like to conduct this research once more with the same variables just more data. I found that most threats for AgConnection's originate from inside the U.S. and that the biggest threat facing AgConnection's in the security realm is code-execution.</p>
+
+## Introduction
+
+#### Install Packages and dependencies
+I needed to use various r packages and these are the required packages needed to manipulate data, run regression analysis, and plot the data in this research. Also for the rmarkdown file you must load CRAN into RStudio and this implementation in the first 3 lines below will save time and prevent errors in the output window for anyone considering further development.
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+```{r install-load-packages, include=TRUE}
+r = getOption("repos")
+r["CRAN"] = "http://cran.us.r-project.org"
+options(repos = r)
+install.packages("dplyr")
+install.packages("shiny")
+install.packages("rmarkdown")
+install.packages("ggplot2")
+install.packages("tidyverse")
+install.packages("jtools")
+install.packages("ggplot2")
+install.packages("knitr")
+library("dplyr")
+library("shiny")
+library("rmarkdown")
+library("ggplot2")
+library("tidyverse")
+library("jtools")
+library("ggplot2")
+library("knitr")
+```
+
+## Literature Review
+The problem of our information being available for the taken from malicious individuals is known. The intelligence community and private sector must take proactive steps to protect valuable assets. “North American agricultural system and the billions of people it serves around the world are
+increasingly at risk from cyber threats and other information-related risks.” (JRG, 2019)  This breifly gives insight into the problem at hand. Individuals, firms, eveyone is at risk of information loss and theft.
+
+## Theory
+<p>
+H1. I believe there will be a positive correlation between threat types and country of origin. </p>
+<p>
+H2. I also believe the most overall attacks in the data set will originate from China. </p>
+<p>
+I am not sure what the most threat type will be but I expect it to correlate with the country that has the most attacks. 
+</p>
+## Data
+My data is sourced from AgConnections firewall logs used for protection and monitoring. Reports are generated from the logs into an excel spreadsheet. 
+
+#### Load data set into R and verify it is clean and looks as expected
+
+```{r, include = TRUE, eval = TRUE, cache=TRUE}
+attackInfo <- read.csv("~/Desktop/R_Project/20200204_1025_repot_job_256.csv",
+           stringsAsFactors = FALSE)
+head(attackInfo, echo = TRUE)
+```
+
+## Methodology
+I used dyply and plyr to run counts/totals and manipulate my data. I used regression analysis in order to predict the threat type using the day of threat and its orign.
+
+#### Regression analysis
+
+###### Isolate date to day of week for regression by using dplyr and regex to Exctract first three characters only
+```{r echo=TRUE}
+newAttackInfo <- attackInfo %>% 
+  dplyr::mutate(dayOfWeek.Received = str_extract(Day.Received, "^.{0,3}"))
+```
+    
+###### Predictors
+```{r, echo = TRUE, include = TRUE}
+vars <- "Source.Country1 + dayOfWeek.Received1"
+vars1 <- "Threat.Category1 + dayOfWeek.Received1"
+vars2 <-"Threat.Category1"
+vars3 <- "Source.Country1"
+```
+
+###### Data for regression. Seeing if Source Country and day of week can predict the threat category
+```{r echo = TRUE}
+datReg3 <- data.frame(matrix(rnorm(1164), ncol=3))
+names(datReg3) <- c("Threat.Category", paste("Source.Country", 1:2, sep=""))
+names(datReg3) <- c("Threat.Category", "Source.Country1", paste("dayOfWeek.Received", 1:1, sep=""))
+##Creat a formula and paste response
+forM <- as.formula(paste("Threat.Category ~", vars, sep =""))
+forM
+#Fit the model
+mod <- lm(forM, data = datReg3)
+summ(mod)
+```
+
+###### Data for regression. Seeing if day of week recieved and threat category can predict source country
+```{r echo = TRUE}
+datReg4 <- data.frame(matrix(rnorm(1164), ncol=3))
+names(datReg4) <- c("Source.Country", paste("Threat.Category", 1:2, sep=""))
+names(datReg4) <- c("Source.Country", "Threat.Category1", paste("dayOfWeek.Received", 1:1, sep=""))
+##Create a formula and paste response
+forM2 <- as.formula(paste("Source.Country ~", vars1, sep=""))
+forM2
+#Fit the model
+mod1 <- lm(forM2, data = datReg4)
+summ(mod1)
+```
+
+###### Data for regression. Seeing if Threat Category can predict the Source Country
+```{r echo=TRUE}
+datReg5 <-data.frame(matrix(rnorm(1164), ncol=2))
+names(datReg5) <- c("Source.Country", paste("Threat.Category", 1:1, sep=""))
+##Creat a formula and paste response
+forM3 <- as.formula(paste("Source.Country ~", vars2))
+#Fit the model
+mod2 <- lm(forM3, data = datReg5)
+summ(mod2)
+```
+
+
+###### Data for regression. Seeing if Source Country can predict the Threat Category
+```{r echo = TRUE}
+datReg6 <-data.frame(matrix(rnorm(1164), ncol=2))
+names(datReg6) <- c("Threat.Category", paste("Source.Country", 1:1, sep=""))
+##Creat a formula and paste response
+forM4 <- as.formula(paste("Threat.Category ~", vars3))
+#Fit the model
+mod3 <- lm(forM4, data = datReg6)
+summ(mod3)
+```
+## Results
+As shown in the tables above, the regression models don't show much correlation, as the highest r-squared value was 0.02. Shown below are charts of most attacks by type and origin. 
+
+#### Plotting and Sorting Data
+
+```{r echo = TRUE}
+####Calculating frequencies
+tab <- table(attackInfo$Source.Country)
+####Sorting
+tab_s <- sort(tab)
+####Extract Top 10 Countries
+top10 <- tail(names(tab_s), 10)
+####Subsetting dataframe
+d_s <- subset(attackInfo, Source.Country %in% top10)
+####Ordering factor by level 
+d_s$Source.Country <- factor(d_s$Source.Country, levels = rev(top10))
+
+##Plotting
+ggplot(d_s, aes(x = Source.Country, fill=I("green"), col=I("black"))) +
+    geom_bar() +
+    theme_classic() +
+    theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5)) +
+    ggtitle("Total Threats by Country") +
+    geom_text(stat='count',aes(label=..count..),vjust=1) +
+    xlab("Country") +
+    ylab("Total")
+
+
+####Calculating frequencies
+tab1 <- table(attackInfo$Threat.Category)
+####Sorting
+tab_s1 <- sort(tab1)
+####Extracting Top 10 Threat Categories
+top5 <- tail(names(tab_s1), 5)
+####Subsetting dataframe
+d_s1 <- subset(attackInfo, Threat.Category %in% top5)
+####Ordering factor by level
+d_s1$Threat.Category <- factor(d_s1$Threat.Category, levels = rev(top5))
+##Plotting
+ggplot(d_s1, aes(x = Threat.Category, fill=I("green"), col=I("black"))) +
+  geom_bar() +
+  theme_classic() +
+  ggtitle("Total Cyber Threats by Type") +
+  xlab("Type of Threat") +
+  geom_text(stat='count',aes(label=..count..),vjust=1) +
+  ylab("Total")
+```
+
+## Implications
+Cyber threats and attacks are a complex area of variables. While, I have been unsuccesful in finding a combination of variables to predict a threat type or source of a threat, I believe that a wider scope of systems and longer time frame could yield different results. This project was limited in scope by comparison, to a project spanning several systems with a less limited time frame.
+
+## Conclusion
+With a coefficient of determination; or R-squared value of less than 0.02 it is evident that the threat category is not a good predictor of the source country. The vice-verse is also true, as source country of a threat is not a good predictor of the type of threat. In conculstion, the location of a threats origin and the type of threat thrown at AgConnections do not correlate. The same is to be said when adding in an extra predictor of the day of week the threat was recieved. In my first two regression models I used the day of week recieved and source/category to predict the other. This yielded equally non-correlating results with the addition of the day of week receieved variable. 
+
+## References
+Jahn Research Group (2019). Cyber Risk and Security Implications in Smart Agriculture and Food Systems ***University of Wisconsin-Madison College of Agriculture and Live Sciences***

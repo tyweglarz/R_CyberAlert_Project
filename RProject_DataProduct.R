@@ -7,10 +7,9 @@
     pdf_document: default 
 ---
    
-
+getwd()
 ## Load data set into R
-
-attackInfo <- read.csv("~/Desktop/R_Project/20200204_1025_repot_job_256.csv",
+attackInfo <- read.csv("~/Documents/GitHub/R_CyberAlert_Project/20200204_1025_repot_job_256.csv",
            stringsAsFactors = FALSE)
 
 ## Verify data set is clean and looks as expected
@@ -29,6 +28,7 @@ install.packages("yaml")
 install.packages("ggplot2")
 install.packages("tidyverse")
 install.packages("jtools")
+install.packages("rsconnect")
 
 
 ##Isolate Date to day of week for regressions by using dplyr and regex to
@@ -36,7 +36,7 @@ install.packages("jtools")
 newAttackInfo <- attackInfo %>% 
   dplyr::mutate(dayOfWeek.Received = str_extract(Day.Received, "^.{0,3}"))
 
-    
+rsconnect::setAccountInfo(name='tweglarz', token='52BA42B99189ED4349D4B027CD234423', secret='jNCQ1iZ86sTj0xIc0RTCqRTVXEsRxB0zIdpKFxtx')
 ##Predictors
 vars <- "Source.Country1 + dayOfWeek.Received1"
 vars1 <- "Threat.Category1 + dayOfWeek.Received1"

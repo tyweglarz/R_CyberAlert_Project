@@ -1,0 +1,13 @@
+name: R_CyberAlert_Project
+title: R_CyberAlert_Project
+username:
+account: tweglarz
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2202676
+bundleId: 3090151
+url: https://tweglarz.shinyapps.io/R_CyberAlert_Project/
+when: 1588340231.88323
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: README.md|RProject_DataProduct.R|Untitled.docx|Untitled.Rmd|Untitled_files/figure-docx/unnamed-chunk-8-1.png|Untitled_files/figure-docx/unnamed-chunk-8-2.png

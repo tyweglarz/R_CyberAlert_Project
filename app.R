@@ -4,7 +4,7 @@ library(tidyverse)
 library(shiny)
 library(shinyjs)
 
-attackInfo <- read.csv("~/Desktop/R_Project/20200204_1025_repot_job_256.csv",
+attackInfo <- read.csv("20200204_1025_repot_job_256.csv",
                        stringsAsFactors = FALSE)
 newAttackInfo <- attackInfo %>% 
     dplyr::mutate(dayOfWeek.Received = str_extract(Day.Received, "^.{0,3}"))
